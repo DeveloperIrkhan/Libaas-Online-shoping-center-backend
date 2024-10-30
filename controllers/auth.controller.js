@@ -3,9 +3,6 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { generateAccessAndRefreshTokens } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken";
 
-
-
-
 const registerAsync = async (req, resp) => {
   //  get details from frontend
   const { firstName, lastName, email, password } = req.body;
@@ -65,7 +62,7 @@ const registerAsync = async (req, resp) => {
     user: createdUser
   });
 };
-//user login 
+//user login
 const loginAsync = async (req, resp) => {
   // getting data from  req.body
   const { email, password } = req.body;
@@ -197,7 +194,7 @@ const setNewPasswordAsync = async (req, resp) => {
     });
   }
   //checking old password
-  console.log("oldPassword",oldPassword)
+  console.log("oldPassword", oldPassword);
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
   if (!isPasswordCorrect) {
     return resp.status(401).json({
@@ -250,6 +247,40 @@ const changeUserAvator = async (req, resp) => {
     user
   });
 };
+
+const changeUserRole = async (req, resp) => {
+  const { UserId, Role } = req.body;
+  console.log(UserId, Role);
+  try {
+    const updatingUser = await User.findByIdAndUpdate(
+      UserId,
+      {
+        $set: { UserRole: Role }
+      },
+      { new: true } // Return the updated document
+    ).select("-password");
+
+    // Check if the user was found and updated
+    if (!updatingUser) {
+      return resp.status(401).json({
+        success: false,
+        message: "User role is not updated, user not found."
+      });
+    }
+    return resp.status(200).json({
+      success: true,
+      message: "user role is updated",
+      updatingUser
+    });
+  } catch (error) {
+    return resp.status(500).json({
+      success: false,
+      message: "An error occurred while updating user role",
+      error
+    });
+  }
+};
+
 export {
   registerAsync,
   loginAsync,
@@ -257,5 +288,6 @@ export {
   refreshTokenAsync,
   setNewPasswordAsync,
   getCurrentUserInfo,
-  changeUserAvator
+  changeUserAvator,
+  changeUserRole
 };

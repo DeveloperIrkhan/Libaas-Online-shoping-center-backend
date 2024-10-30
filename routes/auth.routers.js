@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   changeUserAvator,
+  changeUserRole,
   getCurrentUserInfo,
   loginAsync,
   logoutAsync,
@@ -10,6 +11,7 @@ import {
 } from "../controllers/auth.controller.js";
 import { fileUpload } from "../middleware/multer.middleware.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
+import { IsAdmin } from "../middleware/IsAdmin.middleware.js";
 const authRouter = Router();
 
 authRouter.route("/register").post(fileUpload.single("avator"), registerAsync);
@@ -26,9 +28,10 @@ authRouter.route("/get-refresh-token").get(refreshTokenAsync);
 authRouter.route("/logout").post(verifyJWT, logoutAsync);
 authRouter.route("/forgot-password").post(verifyJWT, setNewPasswordAsync);
 authRouter.route("/user-info").get(verifyJWT, getCurrentUserInfo);
+authRouter.route("/change-role").post(verifyJWT, IsAdmin, changeUserRole);
 authRouter
   .route("/change-avator")
-  .post(fileUpload.single("avator"),verifyJWT, changeUserAvator);
+  .post(fileUpload.single("avator"), verifyJWT, changeUserAvator);
 //authRouter.post("/register", registerAsync);
 
 export default authRouter;

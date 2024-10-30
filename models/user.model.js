@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { userRoleEnums } from "../enums/userRoles.js";
 
 const userSchema = new Schema(
   {
@@ -18,6 +19,12 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true
     },
+    UserRole: {
+      type: Number,
+      require: true,
+      default: userRoleEnums.USER
+    },
+
     email: {
       type: String,
       require: [true, "email is required!"],
