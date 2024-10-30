@@ -1,11 +1,12 @@
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { generateAccessAndRefreshTokens } from "../utils/generateTokens.js";
-const registerAsync = async (req, resp) => {
-  // if not then create a new user and send a response back to frontend
-  // removing password and refresh token form response
-  //  returning response the the frontend
+import jwt from "jsonwebtoken";
 
+
+
+
+const registerAsync = async (req, resp) => {
   //  get details from frontend
   const { firstName, lastName, email, password } = req.body;
   // validation checking
@@ -45,21 +46,26 @@ const registerAsync = async (req, resp) => {
     email,
     password
   });
+  // removing password and refresh token form response
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
   // checking for user creating
+  // if not then create a new user and send a response back to frontend
+
   if (!createdUser) {
     return resp.status(500).json({
       success: false,
       message: "Failed to create user"
     });
   }
+  //  returning response the the frontend
   return resp.status(200).json({
     message: "user registered successfully...",
     user: createdUser
   });
 };
+//user login 
 const loginAsync = async (req, resp) => {
   // getting data from  req.body
   const { email, password } = req.body;
@@ -77,7 +83,7 @@ const loginAsync = async (req, resp) => {
       .json({ success: false, message: "user is not yet registered" });
   }
   // checking password
-  const isPasswordCorrect = await user.isPasswordCorrrect(password);
+  const isPasswordCorrect = await user.isPasswordCorrect(password);
   if (!isPasswordCorrect) {
     return resp
       .status(401)
@@ -110,7 +116,7 @@ const loginAsync = async (req, resp) => {
       loggedIn
     });
 };
-
+// user logout
 const logoutAsync = async (req, resp) => {
   const _id = req.user._id;
   await User.findByIdAndUpdate(_id, {
@@ -133,5 +139,123 @@ const logoutAsync = async (req, resp) => {
       message: "user loggedOut seccessfully"
     });
 };
+// getting acceccToken from refresh token
+const refreshTokenAsync = async (req, resp) => {
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
+  console.log("incomingRefreshToken", incomingRefreshToken);
+  if (!incomingRefreshToken) {
+    return resp
+      .status(401)
+      .json({ success: false, message: "unautherized request" });
+  }
+  const decodedToken = jwt.verify(
+    incomingRefreshToken,
+    process.env.REFRESH_TOKEN_SECRET
+  );
 
-export { registerAsync, loginAsync, logoutAsync };
+  const user = await User.findById(decodedToken?._id);
+  if (!user) {
+    return resp
+      .status(401)
+      .json({ success: false, message: "invalid refresh token" });
+  }
+  if (incomingRefreshToken !== user?.refreshToken) {
+    return resp
+      .status(401)
+      .json({ success: false, message: "refresh token is expired" });
+  }
+
+  const options = {
+    httpOnly: true,
+    secure: false
+  };
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id
+  );
+  return resp
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json({
+      success: true,
+      message: "access token get seccessfully",
+      accessToken,
+      refreshToken
+    });
+};
+// reset password
+const setNewPasswordAsync = async (req, resp) => {
+  const { oldPassword, newPassword } = req.body;
+  //getting loggedIn user details from auth middleware
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return resp.status(401).json({
+      success: false,
+      message: "invalid user"
+    });
+  }
+  //checking old password
+  console.log("oldPassword",oldPassword)
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+  if (!isPasswordCorrect) {
+    return resp.status(401).json({
+      success: false,
+      message: "Old password not matched."
+    });
+  }
+  //if old password is conrrect then update with new password
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+  return resp.status(200).json({
+    success: true,
+    message: "password changed successfully"
+  });
+};
+//getting logged In user info
+const getCurrentUserInfo = async (req, resp) => {
+  return resp.status(200).json({
+    user: req.user,
+    success: true,
+    message: "user fetched successfully"
+  });
+};
+// changing user image
+const changeUserAvator = async (req, resp) => {
+  const localAvatorPath = req.file?.path;
+  if (!localAvatorPath) {
+    return resp.status(401).json({
+      success: false,
+      message: "Please upload a avator image"
+    });
+  }
+  const clouninaryImage = await uploadOnCloudinary(localAvatorPath);
+  if (!clouninaryImage.url) {
+    return resp
+      .status(400)
+      .json({ message: "image is not uploaded on cloudinary" });
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: { avator: clouninaryImage.url }
+    },
+    { new: true }
+  ).select("-password");
+  return resp.status(200).json({
+    success: true,
+    message: "image uploaded on cloudinary",
+    user
+  });
+};
+export {
+  registerAsync,
+  loginAsync,
+  logoutAsync,
+  refreshTokenAsync,
+  setNewPasswordAsync,
+  getCurrentUserInfo,
+  changeUserAvator
+};

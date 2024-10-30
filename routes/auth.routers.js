@@ -1,8 +1,12 @@
 import { Router } from "express";
 import {
+  changeUserAvator,
+  getCurrentUserInfo,
   loginAsync,
   logoutAsync,
-  registerAsync
+  refreshTokenAsync,
+  registerAsync,
+  setNewPasswordAsync
 } from "../controllers/auth.controller.js";
 import { fileUpload } from "../middleware/multer.middleware.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
@@ -16,9 +20,15 @@ authRouter.route("/register").post(fileUpload.single("avator"), registerAsync);
 // ]), registerAsync);
 
 authRouter.route("/login").post(loginAsync);
+authRouter.route("/get-refresh-token").get(refreshTokenAsync);
 
 //secure routes
 authRouter.route("/logout").post(verifyJWT, logoutAsync);
+authRouter.route("/forgot-password").post(verifyJWT, setNewPasswordAsync);
+authRouter.route("/user-info").get(verifyJWT, getCurrentUserInfo);
+authRouter
+  .route("/change-avator")
+  .post(fileUpload.single("avator"),verifyJWT, changeUserAvator);
 //authRouter.post("/register", registerAsync);
 
 export default authRouter;

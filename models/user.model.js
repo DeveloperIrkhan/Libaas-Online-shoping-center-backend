@@ -47,7 +47,12 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.methods.isPasswordCorrrect = async function (password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
+  if (!password || !this.password) {
+    console.log("Old Password:", password);
+    console.log("Hashed Password from DB:", this.password);
+    throw new Error("password compare failed: invalid data");
+  }
   return await bycrpt.compare(password, this.password);
 };
 
