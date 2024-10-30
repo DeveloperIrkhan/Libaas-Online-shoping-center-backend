@@ -11,3 +11,13 @@ const storage = multer.diskStorage({
 });
 
 export const fileUpload = multer({ storage });
+/*
+const multerStorage = multer.diskStorage({
+  filename: function (req, file, callback) {
+    callback(null, file.originalname);
+  }
+});
+const fileUploads = multer({ multerStorage });
+export default fileUploads;
+*/
+// shift alt A

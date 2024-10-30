@@ -2,6 +2,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { generateAccessAndRefreshTokens } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken";
+import validator from "validator";
 
 const registerAsync = async (req, resp) => {
   //  get details from frontend
@@ -12,11 +13,20 @@ const registerAsync = async (req, resp) => {
   ) {
     return resp.status(400).json({ message: "Please fill all fields" });
   }
+  if (!validator.isEmail(email)) {
+    return resp
+      .status(400)
+      .json({ message: "Please enter a valid email address" });
+  }
+
+  if (password.length < 8) {
+    return resp.status(400).json({ message: "please enter a strong password" });
+  }
 
   // checking if user is already registered
   const existedUser = await User.findOne({ email });
   if (existedUser) {
-    return resp.status(409).json({ message: "User is already existed" });
+    return resp.status(401).json({ message: "User is already existed" });
   }
 
   // checking image or avator
@@ -250,7 +260,6 @@ const changeUserAvator = async (req, resp) => {
 
 const changeUserRole = async (req, resp) => {
   const { UserId, Role } = req.body;
-  console.log(UserId, Role);
   try {
     const updatingUser = await User.findByIdAndUpdate(
       UserId,

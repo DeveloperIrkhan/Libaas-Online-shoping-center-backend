@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import authRouter from "./routes/auth.routers.js";
+import authRouter from "./routes/auth.routes.js";
 import { connectionDb } from "./config/db.connection.js";
 import cookieParser from "cookie-parser";
+import productRoutes from "./routes/product.routes.js";
 // App config
 
 const app = express();
@@ -27,8 +28,9 @@ app.get("/", (req, res) => {
   res.send("API is working.");
 });
 
-//routers declarations
+//routes declarations
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/product", productRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
