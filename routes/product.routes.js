@@ -11,7 +11,7 @@ import { IsAdmin } from "../middleware/IsAdmin.middleware.js";
 
 const productRoutes = new Router();
 
-productRoutes.route("/get-product:_id").get(getProductAsync);
+productRoutes.route("/get-product/:id").get(getProductAsync);
 productRoutes.route("/get-products").post(GetProductsAsync);
 //secure routes
 productRoutes.route("/create-product").post(

@@ -23,13 +23,16 @@ const createProductAsync = async (req, resp) => {
     const productImage1 = req.files.productImage1 && req.files.productImage1[0];
     const productImage2 = req.files.productImage2 && req.files.productImage2[0];
     const productImage3 = req.files.productImage3 && req.files.productImage3[0];
+    console.log("productImage0", productImage0.filename);
+    console.log("productImage1", productImage1.filename);
+    console.log("productImage2", productImage2.filename);
+    console.log("productImage3", productImage3.filename);
     const ImageArray = [
       productImage0,
       productImage1,
       productImage2,
       productImage3
     ].filter((item) => item !== undefined);
-
     const Images = await Promise.all(
       ImageArray.map(async (item) => {
         let result = await uploadOnCloudinary(item.path);
@@ -69,10 +72,18 @@ const createProductAsync = async (req, resp) => {
 const updateProductAsync = async (req, resp) => {};
 const GetProductsAsync = async (req, resp) => {};
 const getProductAsync = async (req, resp) => {
-  const productId = req.params._id;
-  console.log(productId);
+  const productId = req.params.id;
   const product = await productModel.findById(productId);
-  console.log(product);
+  if (!product) {
+    return resp
+      .status(404)
+      .json({ success: false, message: "product not found" });
+  }
+  return resp.status(200).json({
+    success: true,
+    message: "product fetched successfully",
+    product
+  });
 };
 const deleteProductAsync = async (req, resp) => {};
 
