@@ -7,7 +7,7 @@ export const IsAdmin = async (req, resp, next) => {
     if (user.UserRole !== userRoleEnums.ADMIN) {
       return resp.status(401).send({
         success: false,
-        message: "un-autherized user"
+        message: "un-autherized user, please login as admin"
       });
     } else {
       next();

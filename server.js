@@ -33,5 +33,5 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/product", productRoutes);
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port http://localhost:${port}`);
 });
