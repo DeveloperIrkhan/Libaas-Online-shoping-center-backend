@@ -4,8 +4,10 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
     "server": "nodemon server.js",
+    "frontend":"npm run dev --prefix ../front-end",
+    "backend":"npm run server --prefix ../back-end",
+    "start":"concurrently \"npm run frontend\" \"npm run backend\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -14,6 +16,7 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",
+    "concurrently": "^9.0.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
