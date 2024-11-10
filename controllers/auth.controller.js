@@ -31,7 +31,6 @@ const registerAsync = async (req, resp) => {
 
   // checking image or avator
   const avatarlocalPath = req.file?.path;
-  // const  avatar = req.files?.avator[0].path;
   if (!avatarlocalPath) {
     return resp.status(400).json({ message: "Please upload an avatar" });
   }
@@ -68,6 +67,7 @@ const registerAsync = async (req, resp) => {
   }
   //  returning response the the frontend
   return resp.status(200).json({
+    success: true,
     message: "user registered successfully...",
     user: createdUser
   });
@@ -143,7 +143,7 @@ const logoutAsync = async (req, resp) => {
     .clearCookie("refreshToken", options)
     .json({
       success: true,
-      message: "user loggedOut seccessfully"
+      message: "user logged out seccessfully"
     });
 };
 // getting acceccToken from refresh token

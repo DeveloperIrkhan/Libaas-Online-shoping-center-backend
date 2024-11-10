@@ -7,11 +7,14 @@ export const verifyJWT = async (req, resp, next) => {
       req.cookies?.accessToken ||
       req.headers["authorization"]?.replace("Bearer ", "");
     // req.headers("Authorization")?.replace("Bearer ", "");
-    if (!token)
+    console.log(token);
+    if (!token) {
+      console.log("token not found");
       return resp.status(401).send({
         success: false,
         message: "Unauthorized request"
       });
+    }
 
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const findedUser = await User.findById(decodedToken._id).select(
@@ -23,7 +26,7 @@ export const verifyJWT = async (req, resp, next) => {
       return resp.status(401).send({
         success: false,
         message: "invalid token",
-        error
+        error: error.message
       });
     }
     req.user = findedUser;
@@ -32,7 +35,7 @@ export const verifyJWT = async (req, resp, next) => {
     return resp.status(401).send({
       success: false,
       message: "invalid access token",
-      error
+      error: error.message
     });
   }
 };
