@@ -103,9 +103,15 @@ const loginAsync = async (req, resp) => {
   const loggedIn = await User.findById(user._id).select(
     "-password -refreshToken"
   );
+  await User.findByIdAndUpdate(
+    user._id,
+    {
+      $set: { refreshToken: refreshToken }
+    },
+    { new: true }
+  );
 
   // sending response to user.
-
   const options = {
     httpOnly: true,
     secure: false,
@@ -156,41 +162,52 @@ const refreshTokenAsync = async (req, resp) => {
       .status(401)
       .json({ success: false, message: "unautherized request" });
   }
-  const decodedToken = jwt.verify(
-    incomingRefreshToken,
-    process.env.REFRESH_TOKEN_SECRET
-  );
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+    const user = await User.findById(decodedToken?.id);
+    if (incomingRefreshToken !== user?.refreshToken) {
+      return resp
+        .status(401)
+        .json({ success: false, message: "refresh token is expired" });
+    }
 
-  const user = await User.findById(decodedToken?._id);
-  if (!user) {
+    if (!user) {
+      return resp
+        .status(401)
+        .json({ success: false, message: "invalid refresh token" });
+    }
+    const loggedIn = await User.findById(user._id).select(
+      "-password -refreshToken"
+    );
+    const options = {
+      httpOnly: true,
+      secure: false
+    };
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+      user._id
+    );
+
+    return resp
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({
+        success: true,
+        message: "access token get seccessfully",
+        accessToken,
+        refreshToken,
+        loggedIn
+      });
+  } catch (error) {
+    console.error("Token verification error:", error.message); // Log the specific error message
     return resp
       .status(401)
-      .json({ success: false, message: "invalid refresh token" });
+      .json({ success: false, message: "refresh token is expired or invalid" });
   }
-  if (incomingRefreshToken !== user?.refreshToken) {
-    return resp
-      .status(401)
-      .json({ success: false, message: "refresh token is expired" });
-  }
-
-  const options = {
-    httpOnly: true,
-    secure: false
-  };
-
-  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-    user._id
-  );
-  return resp
-    .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json({
-      success: true,
-      message: "access token get seccessfully",
-      accessToken,
-      refreshToken
-    });
 };
 // reset password
 const setNewPasswordAsync = async (req, resp) => {
