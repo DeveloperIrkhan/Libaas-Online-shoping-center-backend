@@ -20,6 +20,7 @@ const createProductAsync = async (req, resp) => {
     ) {
       return resp.status(400).json({ message: "Please fill all fields" });
     }
+
     const productImage0 = req.files.productImage0 && req.files.productImage0[0];
     const productImage1 = req.files.productImage1 && req.files.productImage1[0];
     const productImage2 = req.files.productImage2 && req.files.productImage2[0];
@@ -197,11 +198,11 @@ const updateProductAsync = async (req, resp) => {
 const deleteProductAsync = async (req, resp) => {
   const { id } = req.params;
   const product = await productModel.findByIdAndDelete(id);
-  if(!product){
+  if (!product) {
     return resp.status(404).json({
-    success:false,
-    message:"product not found"
-    })
+      success: false,
+      message: "product not found"
+    });
   }
   return resp.status(200).json({ success: true, message: "product removed" });
 };
