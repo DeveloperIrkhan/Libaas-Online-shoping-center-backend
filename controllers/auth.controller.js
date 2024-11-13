@@ -114,7 +114,8 @@ const loginAsync = async (req, resp) => {
   // sending response to user.
   const options = {
     httpOnly: true,
-    secure: false,
+    secure: false, // Use true if your site is served over HTTPS
+    path: "/",
     sameSite: "None"
   };
   return resp
@@ -140,7 +141,9 @@ const logoutAsync = async (req, resp) => {
 
   const options = {
     httpOnly: true,
-    secure: true
+    secure: false, // Ensure the secure flag is set only if you are on HTTPS
+    path: "/",
+    sameSite: "None"
   };
 
   return resp
@@ -184,9 +187,10 @@ const refreshTokenAsync = async (req, resp) => {
     );
     const options = {
       httpOnly: true,
-      secure: false
+      secure: false, // Ensure the secure flag is set only if you are on HTTPS
+      path: "/",
+      sameSite: "None"
     };
-
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
       user._id
     );
