@@ -9,8 +9,13 @@ const productSchema = new mongoose.Schema({
     type: String,
     require: true
   },
-  price: {
+  originalPrice: {
     type: Number,
+    require: true
+  },
+  discountPrice: {
+    type: Number,
+    default: 0,
     require: true
   },
   productImage: {
@@ -30,6 +35,17 @@ const productSchema = new mongoose.Schema({
     require: true
   },
   bestSeller: {
+    type: Boolean,
+    default: false,
+    require: true
+  },
+  NewArrival: {
+    default: false,
+    type: Boolean,
+    require: true
+  },
+  SaleOnProduct: {
+    default: false,
     type: Boolean,
     require: true
   },

@@ -7,20 +7,30 @@ const createProductAsync = async (req, resp) => {
     const {
       name,
       description,
-      price,
+      originalPrice,
+      discountPrice,
       category,
       subCategory,
       sizes,
-      bestSeller
+      bestSeller,
+      NewArrival,
+      SaleOnProduct
     } = req.body;
     if (
-      [name, description, price, category, subCategory, sizes, bestSeller].some(
+      [name, description, originalPrice, category, subCategory, sizes].some(
         (field) => field?.trim() === ""
       )
     ) {
       return resp.status(400).json({ message: "Please fill all fields" });
     }
-
+    console.log(
+      "bestSeller:",
+      bestSeller,
+      "NewArrival:",
+      NewArrival,
+      "SaleOnProduct:",
+      SaleOnProduct
+    );
     const productImage0 = req.files.productImage0 && req.files.productImage0[0];
     const productImage1 = req.files.productImage1 && req.files.productImage1[0];
     const productImage2 = req.files.productImage2 && req.files.productImage2[0];
@@ -45,12 +55,15 @@ const createProductAsync = async (req, resp) => {
     const productData = {
       name,
       description,
-      price: Number(price),
+      originalPrice: Number(originalPrice),
+      discountPrice: Number(discountPrice),
       productImage: Images,
       category,
       subCategory,
       sizes: JSON.parse(sizes),
-      bestSeller: bestSeller === "true" ? true : false,
+      bestSeller,
+      NewArrival,
+      SaleOnProduct,
       date: Date.now()
     };
     const product = new productModel(productData);
@@ -93,7 +106,7 @@ const GetProductsAsync = async (req, resp) => {
         .status(404)
         .json({ success: false, message: "products not found" });
     }
-    console.log(products);
+    // console.log(products);
     return resp.status(200).json({
       success: true,
       message: "product fetched successfully",
@@ -114,11 +127,14 @@ const updateProductAsync = async (req, resp) => {
     const {
       name,
       description,
-      price,
+      originalPrice,
+      discountPrice,
       category,
       subCategory,
       sizes,
-      bestSeller
+      bestSeller,
+      NewArrival,
+      SaleOnProduct
     } = req.body;
 
     const existingProduct = await productModel.findById(id);
@@ -128,9 +144,17 @@ const updateProductAsync = async (req, resp) => {
 
     // Check for empty fields if required fields are being updated
     if (
-      [name, description, price, category, subCategory, sizes, bestSeller].some(
-        (field) => field?.trim() === ""
-      )
+      [
+        name,
+        description,
+        originalPrice,
+        category,
+        subCategory,
+        sizes,
+        bestSeller,
+        NewArrival,
+        SaleOnProduct
+      ].some((field) => field?.trim() === "")
     ) {
       return resp.status(400).json({ message: "Please fill all fields" });
     }
@@ -160,15 +184,28 @@ const updateProductAsync = async (req, resp) => {
     const updatedData = {
       name: name || existingProduct.name,
       description: description || existingProduct.description,
-      price: price ? Number(price) : existingProduct.price,
+      originalPrice: originalPrice
+        ? Number(originalPrice)
+        : existingProduct.originalPrice,
+      discountPrice: discountPrice
+        ? Number(discountPrice)
+        : existingProduct.discountPrice,
       productImage: Images,
       category: category || existingProduct.category,
       subCategory: subCategory || existingProduct.subCategory,
       sizes: sizes ? JSON.parse(sizes) : existingProduct.sizes,
       bestSeller:
         bestSeller !== undefined
-          ? bestSeller === "true"
+          ? bestSeller === true
           : existingProduct.bestSeller,
+      SaleOnProduct:
+        SaleOnProduct !== undefined
+          ? SaleOnProduct === true
+          : existingProduct.SaleOnProduct,
+      NewArrival:
+        NewArrival !== undefined
+          ? NewArrival === true
+          : existingProduct.NewArrival,
       date: Date.now() // Update date to the current time
     };
 
