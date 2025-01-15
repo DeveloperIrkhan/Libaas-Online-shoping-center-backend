@@ -23,14 +23,7 @@ const createProductAsync = async (req, resp) => {
     ) {
       return resp.status(400).json({ message: "Please fill all fields" });
     }
-    console.log(
-      "bestSeller:",
-      bestSeller,
-      "NewArrival:",
-      NewArrival,
-      "SaleOnProduct:",
-      SaleOnProduct
-    );
+    
     const productImage0 = req.files.productImage0 && req.files.productImage0[0];
     const productImage1 = req.files.productImage1 && req.files.productImage1[0];
     const productImage2 = req.files.productImage2 && req.files.productImage2[0];

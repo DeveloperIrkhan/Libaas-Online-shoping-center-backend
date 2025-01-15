@@ -10,3 +10,10 @@ export const connectionDb = () => {
     console.error("MongoDB connection error: ", error);
   }
 };
+
+// export const connectionDb = async () => {
+//   mongoose.connection.on("connected", () => {
+//     console.log("Connection successfully Established");
+//   });
+//   await mongoose.connect(`${process.env.MONGO_DB_URI}/LibaasPK`);
+// };
