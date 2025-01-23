@@ -11,6 +11,7 @@ import SubCategoryRoute from "./routes/subCategory.router.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
 
 // middlewares
 
@@ -19,7 +20,15 @@ app.use(cookieParser());
 app.use(
   cors({
     // origin: process.env.CORS_ORIGIN,
-    origin: "http://localhost:5173",
+    // origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true
   })
 );
